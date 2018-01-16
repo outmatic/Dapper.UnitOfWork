@@ -23,5 +23,4 @@ namespace Dapper.UnitOfWork
             return new UnitOfWork(conn, transactional);
         }
     }
-
 }
