@@ -3,92 +3,97 @@ using System.Data;
 
 namespace Dapper.UnitOfWork
 {
-    public interface IUnitOfWork : IDisposable
-    {
-        void Commit();
-        T Query<T>(IQuery<T> query);
-        void Execute(ICommand command);
+	public interface IUnitOfWork : IDisposable
+	{
+		T Query<T>(IQuery<T> query);
+		void Execute(ICommand command);
+		T Execute<T>(ICommand<T> command);
+		void Commit();
+		void Rollback();
+	}
 
-        T Execute<T>(ICommand<T> command);
-        void Rollback();
-    }
+	public class UnitOfWork : IUnitOfWork
+	{
+		private bool _disposed;
+		private IDbConnection _connection;
+		private readonly RetryOptions _retryOptions;
+		private IDbTransaction _transaction;
+		private readonly IExceptionDetector _exceptionDetector;
 
-    public class UnitOfWork : IUnitOfWork
-    {
-        private bool _disposed;
-        private IDbConnection _connection;
-        private IDbTransaction _transaction;
+		internal UnitOfWork(IDbConnection connection, bool transactional = false, RetryOptions retryOptions = null)
+		{
+			_connection = connection;
+			_retryOptions = retryOptions ?? RetryOptions.Default;
 
-        public UnitOfWork(IDbConnection connection, bool transactional = false)
-        {
-            _connection = connection;
-            if (transactional)
-            {
-                _transaction = connection.BeginTransaction();
-            }
-        }
+			if (transactional)
+			{
+				_transaction = connection.BeginTransaction();
+			}
 
-        public T Query<T>(IQuery<T> query)
-        {
-            return query.Execute(_connection, _transaction);
-        }
+			_exceptionDetector = new SqlTransientExceptionDetector();
+		}
 
-        public void Execute(ICommand command)
-        {
-            if (command.RequiresTransaction && _transaction == null)
-            {
-                throw new Exception($"The command {command.GetType()} requires a transaction");
-            }
+		public T Query<T>(IQuery<T> query)
+		{
+			return Retry.Do(() => query.Execute(_connection, _transaction), _retryOptions, _exceptionDetector);
+		}
 
-            command.Execute(_connection, _transaction);
-        }
+		public void Execute(ICommand command)
+		{
+			if (command.RequiresTransaction && _transaction == null)
+			{
+				throw new Exception($"The command {command.GetType()} requires a transaction");
+			}
+			
+			Retry.Do(() => command.Execute(_connection, _transaction), _retryOptions, _exceptionDetector);
+		}
 
-        public T Execute<T>(ICommand<T> command)
-        {
-            if (command.RequiresTransaction && _transaction == null)
-            {
-                throw new Exception($"The command {command.GetType()} requires a transaction");
-            }
+		public T Execute<T>(ICommand<T> command)
+		{
+			if (command.RequiresTransaction && _transaction == null)
+			{
+				throw new Exception($"The command {command.GetType()} requires a transaction");
+			}
 
-            return command.Execute(_connection, _transaction);
-        }
+			return Retry.Do(() => command.Execute(_connection, _transaction), _retryOptions, _exceptionDetector);
+		}
 
-        public void Commit()
-        {
-            _transaction?.Commit();
-        }
+		public void Commit()
+		{
+			_transaction?.Commit();
+		}
 
-        public void Rollback()
-        {
-            _transaction?.Rollback();
-        }
+		public void Rollback()
+		{
+			_transaction?.Rollback();
+		}
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
-        ~UnitOfWork()
-        {
-            Dispose(false);
-        }
+		~UnitOfWork()
+		{
+			Dispose(false);
+		}
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed)
-                return;
+		protected virtual void Dispose(bool disposing)
+		{
+			if (_disposed)
+				return;
 
-            if (disposing)
-            {
-                _transaction?.Dispose();
-                _connection?.Dispose();
-            }
+			if (disposing)
+			{
+				_transaction?.Dispose();
+				_connection?.Dispose();
+			}
 
-            _transaction = null;
-            _connection = null;
+			_transaction = null;
+			_connection = null;
 
-            _disposed = true;
-        }
-    }
+			_disposed = true;
+		}
+	}
 }

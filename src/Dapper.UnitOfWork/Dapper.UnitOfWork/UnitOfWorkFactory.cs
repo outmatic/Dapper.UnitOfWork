@@ -4,7 +4,7 @@ namespace Dapper.UnitOfWork
 {
     public interface IUnitOfWorkFactory
     {
-        IUnitOfWork Create(bool transactional = false);
+        IUnitOfWork Create(bool transactional = false, RetryOptions retryOptions = null);
     }
 
     public class UnitOfWorkFactory : IUnitOfWorkFactory
@@ -16,12 +16,11 @@ namespace Dapper.UnitOfWork
             _connectionString = connectionString;
         }
 
-        public IUnitOfWork Create(bool transactional)
+        public IUnitOfWork Create(bool transactional, RetryOptions retryOptions = null)
         {
             var conn = new SqlConnection(_connectionString);
             conn.Open();
-            return new UnitOfWork(conn, transactional);
+            return new UnitOfWork(conn, transactional, retryOptions);
         }
     }
-
 }
