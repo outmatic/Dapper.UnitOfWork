@@ -33,8 +33,9 @@ namespace Dapper.UnitOfWork
 				catch (Exception ex)
 				{
 					HandleException(retryOptions, exceptionDetector, ex, retryCount);
-					retryCount++;
 				}
+
+				retryCount++;
 			}
 
 			return default(T);
@@ -57,8 +58,9 @@ namespace Dapper.UnitOfWork
 				catch (Exception ex)
 				{
 					HandleException(retryOptions, exceptionDetector, ex, retryCount);
-					retryCount++;
 				}
+
+				retryCount++;
 			}
 		}
 	}
