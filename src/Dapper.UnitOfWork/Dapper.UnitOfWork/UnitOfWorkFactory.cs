@@ -16,7 +16,7 @@ namespace Dapper.UnitOfWork
             _connectionString = connectionString;
         }
 
-        public IUnitOfWork Create(bool transactional, RetryOptions retryOptions = null)
+        public IUnitOfWork Create(bool transactional = false, RetryOptions retryOptions = null)
         {
             var conn = new SqlConnection(_connectionString);
             conn.Open();

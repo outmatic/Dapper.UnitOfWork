@@ -43,25 +43,11 @@ namespace Dapper.UnitOfWork
 
 		public static void Do(Action action, RetryOptions retryOptions, IExceptionDetector exceptionDetector)
 		{
-			if (action == null)
+			Do(() =>
 			{
-				throw new ArgumentNullException(nameof(action));
-			}
-
-			var retryCount = 1;
-			while (retryCount <= retryOptions.MaxRetries)
-			{
-				try
-				{
-					action();
-				}
-				catch (Exception ex)
-				{
-					HandleException(retryOptions, exceptionDetector, ex, retryCount);
-				}
-
-				retryCount++;
-			}
+				action();
+				return true;
+			}, retryOptions, exceptionDetector);
 		}
 	}
 }
