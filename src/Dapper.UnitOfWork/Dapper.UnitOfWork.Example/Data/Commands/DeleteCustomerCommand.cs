@@ -17,17 +17,13 @@ namespace Dapper.UnitOfWork.Example.Data.Commands
 		public bool RequiresTransaction => false;
 
 		public DeleteCustomerCommand(string customerId)
-		{
-			_customerId = customerId;
-		}
+			=> _customerId = customerId;
 
+		// this is pure Dapper code
 		public void Execute(IDbConnection connection, IDbTransaction transaction)
-		{
-			// this is pure Dapper code
-			connection.Execute(Sql, new
-			{
-				customerId = _customerId
-			}, transaction);
-		}
+			=> connection.Execute(Sql, new
+				{
+					customerId = _customerId
+				}, transaction);
 	}
 }

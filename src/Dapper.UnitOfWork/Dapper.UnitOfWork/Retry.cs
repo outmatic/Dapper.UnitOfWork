@@ -8,9 +8,7 @@ namespace Dapper.UnitOfWork
 		private static void HandleException(RetryOptions retryOptions, IExceptionDetector exceptionDetector, Exception ex, int retryCount)
 		{
 			if (!exceptionDetector.ShouldRetryOn(ex) || retryOptions.MaxRetries <= 0)
-			{
 				throw ex;
-			}
 
 			var sleepTime = TimeSpan.FromMilliseconds(Math.Pow(retryOptions.WaitMillis, retryCount));
 			Thread.Sleep(sleepTime);
@@ -19,9 +17,7 @@ namespace Dapper.UnitOfWork
 		public static T Do<T>(Func<T> func, RetryOptions retryOptions, IExceptionDetector exceptionDetector)
 		{
 			if (func == null)
-			{
 				throw new ArgumentNullException(nameof(func));
-			}
 
 			var retryCount = 1;
 			while (retryCount <= retryOptions.MaxRetries)
@@ -42,12 +38,10 @@ namespace Dapper.UnitOfWork
 		}
 
 		public static void Do(Action action, RetryOptions retryOptions, IExceptionDetector exceptionDetector)
-		{
-			Do(() =>
-			{
-				action();
-				return true;
-			}, retryOptions, exceptionDetector);
-		}
+			=> Do(() =>
+				{
+					action();
+					return true;
+				}, retryOptions, exceptionDetector);
 	}
 }

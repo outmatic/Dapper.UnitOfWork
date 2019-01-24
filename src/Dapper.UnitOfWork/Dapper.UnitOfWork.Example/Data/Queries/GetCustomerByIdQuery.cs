@@ -18,17 +18,13 @@ namespace Dapper.UnitOfWork.Example.Data.Queries
 		private readonly string _customerId;
 
 		public GetCustomerByIdQuery(string customerId)
-		{
-			_customerId = customerId;
-		}
+			=> _customerId = customerId;
 
+		// this is pure Dapper code
 		public CustomerEntity Execute(IDbConnection connection, IDbTransaction transaction)
-		{
-			// this is pure Dapper code
-			return connection.Query<CustomerEntity>(Sql, new
-			{
-				customerId = _customerId
-			}, transaction).FirstOrDefault();
-		}
+			=> connection.Query<CustomerEntity>(Sql, new
+				{
+					customerId = _customerId
+				}, transaction).FirstOrDefault();
 	}
 }

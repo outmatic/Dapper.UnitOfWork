@@ -7,9 +7,7 @@ namespace Dapper.UnitOfWork
 		public static RetryOptions Default { get; set; }
 
 		static RetryOptions()
-		{
-			Default = new RetryOptions(1, 100);
-		}
+			=> Default = new RetryOptions(1, 100);
 
 		public int MaxRetries { get; }
 		public int WaitMillis { get; }

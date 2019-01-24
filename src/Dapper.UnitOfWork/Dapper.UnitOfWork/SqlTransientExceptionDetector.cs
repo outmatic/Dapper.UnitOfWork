@@ -38,9 +38,7 @@ namespace Dapper.UnitOfWork
 				return ex is TimeoutException;
 
 			foreach (SqlError err in sqlException.Errors)
-			{
 				return HandledErrorNumbers.Contains(err.Number);
-			}
 
 			return false;
 		}
