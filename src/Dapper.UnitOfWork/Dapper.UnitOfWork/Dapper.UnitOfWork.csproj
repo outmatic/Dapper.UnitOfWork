@@ -1,15 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard1.3</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.3.0</Version>
+    <Version>1.4.0</Version>
     <Authors>Alessandro Petrelli</Authors>
     <Company>OUTMATIC Alessandro Petrelli</Company>
-    <PackageReleaseNotes>!.3.0
+    <PackageReleaseNotes>1.4.0
+- allow to pass a specific IExceptionDetector. Fix retries and, by default, use don't retry at all
+- now targeting .netstandard 1.3 to allow support for .net framework 4.6
+1.3.0
 - change target to .net standard</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.5" />
+    <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

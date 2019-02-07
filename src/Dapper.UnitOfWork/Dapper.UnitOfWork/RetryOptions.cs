@@ -7,12 +7,13 @@ namespace Dapper.UnitOfWork
 		public static RetryOptions Default { get; set; }
 
 		static RetryOptions()
-			=> Default = new RetryOptions(1, 100);
+			=> Default = new RetryOptions(1, 100, new SqlTransientExceptionDetector());
 
 		public int MaxRetries { get; }
 		public int WaitMillis { get; }
+		public IExceptionDetector ExceptionDetector { get; set; }
 
-		public RetryOptions(int maxRetries, int waitMillis)
+		public RetryOptions(int maxRetries, int waitMillis, IExceptionDetector exceptionDetector)
 		{
 			if (maxRetries < 1)
 				throw new ArgumentOutOfRangeException(nameof(maxRetries), maxRetries, $"{nameof(maxRetries)} cannot be less than 1");
@@ -21,6 +22,12 @@ namespace Dapper.UnitOfWork
 
 			MaxRetries = maxRetries;
 			WaitMillis = waitMillis;
+			ExceptionDetector = exceptionDetector;
+		}
+
+		public RetryOptions(int maxRetries, int waitMillis) : this(maxRetries, waitMillis, new SqlTransientExceptionDetector())
+		{	
+
 		}
 	}
 }

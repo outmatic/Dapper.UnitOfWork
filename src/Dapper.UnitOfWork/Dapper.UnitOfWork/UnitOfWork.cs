@@ -27,23 +27,23 @@ namespace Dapper.UnitOfWork
 			RetryOptions retryOptions = null)
 		{
 			_connection = connection;
-			_retryOptions = retryOptions ?? RetryOptions.Default;
+			_retryOptions = retryOptions;
 
 			if (transactional)
 				_transaction = connection.BeginTransaction(isolationLevel);
 
-			_exceptionDetector = new SqlTransientExceptionDetector();
+			_exceptionDetector = _retryOptions?.ExceptionDetector;
 		}
 
 		public T Query<T>(IQuery<T> query)
-			=> Retry.Do(() => query.Execute(_connection, _transaction), _retryOptions, _exceptionDetector);
+			=> Retry.Do(() => query.Execute(_connection, _transaction), _retryOptions);
 
 		public void Execute(ICommand command)
 		{
 			if (command.RequiresTransaction && _transaction == null)
 				throw new Exception($"The command {command.GetType()} requires a transaction");
 
-			Retry.Do(() => command.Execute(_connection, _transaction), _retryOptions, _exceptionDetector);
+			Retry.Do(() => command.Execute(_connection, _transaction), _retryOptions);
 		}
 
 		public T Execute<T>(ICommand<T> command)
@@ -51,7 +51,7 @@ namespace Dapper.UnitOfWork
 			if (command.RequiresTransaction && _transaction == null)
 				throw new Exception($"The command {command.GetType()} requires a transaction");
 
-			return Retry.Do(() => command.Execute(_connection, _transaction), _retryOptions, _exceptionDetector);
+			return Retry.Do(() => command.Execute(_connection, _transaction), _retryOptions);
 		}
 
 		public void Commit()

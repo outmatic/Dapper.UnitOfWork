@@ -5,19 +5,22 @@ namespace Dapper.UnitOfWork
 {
 	public class Retry
 	{
-		private static void HandleException(RetryOptions retryOptions, IExceptionDetector exceptionDetector, Exception ex, int retryCount)
+		private static void HandleException(RetryOptions retryOptions, Exception ex, int retryCount)
 		{
-			if (!exceptionDetector.ShouldRetryOn(ex) || retryOptions.MaxRetries <= 0)
+			if (!retryOptions.ExceptionDetector.ShouldRetryOn(ex) || retryCount >= retryOptions.MaxRetries)
 				throw ex;
 
 			var sleepTime = TimeSpan.FromMilliseconds(Math.Pow(retryOptions.WaitMillis, retryCount));
 			Thread.Sleep(sleepTime);
 		}
 
-		public static T Do<T>(Func<T> func, RetryOptions retryOptions, IExceptionDetector exceptionDetector)
+		public static T Do<T>(Func<T> func, RetryOptions retryOptions)
 		{
 			if (func == null)
 				throw new ArgumentNullException(nameof(func));
+
+			if (retryOptions?.ExceptionDetector == null)
+				return func();
 
 			var retryCount = 1;
 			while (retryCount <= retryOptions.MaxRetries)
@@ -28,7 +31,7 @@ namespace Dapper.UnitOfWork
 				}
 				catch (Exception ex)
 				{
-					HandleException(retryOptions, exceptionDetector, ex, retryCount);
+					HandleException(retryOptions, ex, retryCount);
 				}
 
 				retryCount++;
@@ -37,11 +40,11 @@ namespace Dapper.UnitOfWork
 			return default(T);
 		}
 
-		public static void Do(Action action, RetryOptions retryOptions, IExceptionDetector exceptionDetector)
+		public static void Do(Action action, RetryOptions retryOptions)
 			=> Do(() =>
 				{
 					action();
 					return true;
-				}, retryOptions, exceptionDetector);
+				}, retryOptions);
 	}
 }
