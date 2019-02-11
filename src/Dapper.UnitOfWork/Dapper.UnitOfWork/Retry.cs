@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Dapper.UnitOfWork
 {
@@ -11,7 +11,7 @@ namespace Dapper.UnitOfWork
 				throw ex;
 
 			var sleepTime = TimeSpan.FromMilliseconds(Math.Pow(retryOptions.WaitMillis, retryCount));
-			Thread.Sleep(sleepTime);
+			Task.Delay(sleepTime).Wait();
 		}
 
 		public static T Do<T>(Func<T> func, RetryOptions retryOptions)
