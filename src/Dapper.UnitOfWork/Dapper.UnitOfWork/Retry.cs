@@ -12,7 +12,7 @@ namespace Dapper.UnitOfWork
 
 			var sleepTime = TimeSpan.FromMilliseconds(Math.Pow(retryOptions.WaitMillis, retryCount));
 			Task.Delay(sleepTime).Wait();
-		}
+        }
 
 		public static T Do<T>(Func<T> func, RetryOptions retryOptions)
 		{
@@ -37,8 +37,34 @@ namespace Dapper.UnitOfWork
 				retryCount++;
 			}
 
-			return default(T);
+			return default;
 		}
+
+        public static async Task<T> DoAsync<T>(Func<Task<T>> func, RetryOptions retryOptions)
+        {
+            if (func == null)
+                throw new ArgumentNullException(nameof(func));
+
+            if (retryOptions?.ExceptionDetector == null)
+                return await func();
+
+            var retryCount = 1;
+            while (retryCount <= retryOptions.MaxRetries)
+            {
+                try
+                {
+                    return await func();
+                }
+                catch (Exception ex)
+                {
+                    HandleException(retryOptions, ex, retryCount);
+                }
+
+                retryCount++;
+            }
+
+            return default;
+        }
 
 		public static void Do(Action action, RetryOptions retryOptions)
 			=> Do(() =>
@@ -46,5 +72,12 @@ namespace Dapper.UnitOfWork
 					action();
 					return true;
 				}, retryOptions);
-	}
+
+        public static async Task DoAsync(Func<Task> action, RetryOptions retryOptions)
+            => await DoAsync(async () =>
+            {
+                await action();
+                return true;
+            }, retryOptions);
+    }
 }

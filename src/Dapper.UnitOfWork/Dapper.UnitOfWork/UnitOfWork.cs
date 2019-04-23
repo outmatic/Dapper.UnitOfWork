@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace Dapper.UnitOfWork
 {
 	public interface IUnitOfWork : IDisposable
 	{
 		T Query<T>(IQuery<T> query);
+        Task<T> QueryAsync<T>(IAsyncQuery<T> query);
 		void Execute(ICommand command);
+        Task ExecuteAsync(IAsyncCommand command);
 		T Execute<T>(ICommand<T> command);
+        Task<T> ExecuteAsync<T>(IAsyncCommand<T> command);
 		void Commit();
 		void Rollback();
 	}
@@ -18,9 +22,8 @@ namespace Dapper.UnitOfWork
 		private IDbConnection _connection;
 		private readonly RetryOptions _retryOptions;
 		private IDbTransaction _transaction;
-		private readonly IExceptionDetector _exceptionDetector;
 
-		internal UnitOfWork(
+        internal UnitOfWork(
 			IDbConnection connection,
 			bool transactional = false,
 			IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
@@ -31,12 +34,13 @@ namespace Dapper.UnitOfWork
 
 			if (transactional)
 				_transaction = connection.BeginTransaction(isolationLevel);
-
-			_exceptionDetector = _retryOptions?.ExceptionDetector;
-		}
+        }
 
 		public T Query<T>(IQuery<T> query)
 			=> Retry.Do(() => query.Execute(_connection, _transaction), _retryOptions);
+
+        public Task<T> QueryAsync<T>(IAsyncQuery<T> query)
+            => Retry.DoAsync(() => query.ExecuteAsync(_connection, _transaction), _retryOptions);
 
 		public void Execute(ICommand command)
 		{
@@ -50,16 +54,31 @@ namespace Dapper.UnitOfWork
 		{
 			if (command.RequiresTransaction && _transaction == null)
 				throw new Exception($"The command {command.GetType()} requires a transaction");
-
+            
 			return Retry.Do(() => command.Execute(_connection, _transaction), _retryOptions);
 		}
+
+        public Task ExecuteAsync(IAsyncCommand command)
+        {
+            if (command.RequiresTransaction && _transaction == null)
+                throw new Exception($"The command {command.GetType()} requires a transaction");
+
+            return Retry.DoAsync(() => command.ExecuteAsync(_connection, _transaction), _retryOptions);
+        }
+
+        public Task<T> ExecuteAsync<T>(IAsyncCommand<T> command)
+        {
+            if (command.RequiresTransaction && _transaction == null)
+                throw new Exception($"The command {command.GetType()} requires a transaction");
+            
+            return Retry.DoAsync(() => command.ExecuteAsync(_connection, _transaction), _retryOptions);
+        }
 
 		public void Commit()
 			=> _transaction?.Commit();
 
 		public void Rollback()
-			=>
-			_transaction?.Rollback();
+			=> _transaction?.Rollback();
 
 		public void Dispose()
 		{
@@ -81,7 +100,7 @@ namespace Dapper.UnitOfWork
 				_connection?.Dispose();
 			}
 
-			_transaction = null;
+            _transaction = null;
 			_connection = null;
 
 			_disposed = true;

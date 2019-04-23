@@ -1,9 +1,11 @@
 ﻿using System.Data;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Dapper.UnitOfWork.Example.Data.Queries
 {
-	public class GetCustomerByIdQuery : IQuery<CustomerEntity>
+	public class GetCustomerByIdQuery : IQuery<CustomerEntity>, IAsyncQuery<CustomerEntity>
 	{
 		private const string Sql = @"
 			SELECT
@@ -26,5 +28,11 @@ namespace Dapper.UnitOfWork.Example.Data.Queries
 				{
 					customerId = _customerId
 				}, transaction).FirstOrDefault();
-	}
+
+        public Task<CustomerEntity> ExecuteAsync(IDbConnection connection, IDbTransaction transaction, CancellationToken cancellationToken = default)
+            => connection.QueryFirstOrDefaultAsync<CustomerEntity>(Sql, new
+            {
+                customerId = _customerId
+            }, transaction);
+    }
 }

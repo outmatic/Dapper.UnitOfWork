@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Data;
+using System.Threading.Tasks;
 using Dapper.UnitOfWork.Example.Data;
 using Dapper.UnitOfWork.Example.Data.Commands;
 using Dapper.UnitOfWork.Example.Data.Queries;
@@ -7,10 +7,12 @@ using Dapper.UnitOfWork.Example.Data.Queries;
 namespace Dapper.UnitOfWork.Example
 {
 	class Program
-	{
+    {
+        private const string ConnectionString = @"Data Source=.\SQLExpress;database=NORTHWND;Integrated Security=true";
+
 		static void Main(string[] args)
 		{
-			var factory = new UnitOfWorkFactory(@"Data Source=.\SQLExpress;database=NORTHWND;Integrated Security=true");
+			var factory = new UnitOfWorkFactory(ConnectionString);
 
 			PrintCustomer("ALFKI");
 
@@ -31,6 +33,8 @@ namespace Dapper.UnitOfWork.Example
 
 			PrintCustomer(newCustomerId);
 
+            MainAsync(args).GetAwaiter().GetResult();
+
 			Console.WriteLine("Press any key to exit");
 			Console.ReadKey();
 
@@ -45,5 +49,17 @@ namespace Dapper.UnitOfWork.Example
 				}
 			}
 		}
-	}
+
+        private static async Task MainAsync(string[] args)
+        {
+            var factory = new UnitOfWorkFactory(ConnectionString);
+
+            using (var uow = factory.Create(retryOptions:new RetryOptions(5, 100, new SqlTransientExceptionDetector())))
+            {
+                var customer = await uow.QueryAsync(new GetCustomerByIdQuery("ALFKI"));
+
+                Console.WriteLine($"Retrieved asynchronously: {customer.CompanyName}");
+            }
+        }
+    }
 }
