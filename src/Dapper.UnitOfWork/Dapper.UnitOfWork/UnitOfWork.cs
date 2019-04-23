@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dapper.UnitOfWork
@@ -7,11 +8,11 @@ namespace Dapper.UnitOfWork
 	public interface IUnitOfWork : IDisposable
 	{
 		T Query<T>(IQuery<T> query);
-        Task<T> QueryAsync<T>(IAsyncQuery<T> query);
+        Task<T> QueryAsync<T>(IAsyncQuery<T> query, CancellationToken cancellationToken = default);
 		void Execute(ICommand command);
-        Task ExecuteAsync(IAsyncCommand command);
+        Task ExecuteAsync(IAsyncCommand command, CancellationToken cancellationToken = default);
 		T Execute<T>(ICommand<T> command);
-        Task<T> ExecuteAsync<T>(IAsyncCommand<T> command);
+        Task<T> ExecuteAsync<T>(IAsyncCommand<T> command, CancellationToken cancellation = default);
 		void Commit();
 		void Rollback();
 	}
@@ -39,8 +40,8 @@ namespace Dapper.UnitOfWork
 		public T Query<T>(IQuery<T> query)
 			=> Retry.Do(() => query.Execute(_connection, _transaction), _retryOptions);
 
-        public Task<T> QueryAsync<T>(IAsyncQuery<T> query)
-            => Retry.DoAsync(() => query.ExecuteAsync(_connection, _transaction), _retryOptions);
+        public Task<T> QueryAsync<T>(IAsyncQuery<T> query, CancellationToken cancellationToken = default)
+            => Retry.DoAsync(() => query.ExecuteAsync(_connection, _transaction, cancellationToken), _retryOptions);
 
 		public void Execute(ICommand command)
 		{
@@ -58,20 +59,20 @@ namespace Dapper.UnitOfWork
 			return Retry.Do(() => command.Execute(_connection, _transaction), _retryOptions);
 		}
 
-        public Task ExecuteAsync(IAsyncCommand command)
+        public Task ExecuteAsync(IAsyncCommand command, CancellationToken cancellationToken = default)
         {
             if (command.RequiresTransaction && _transaction == null)
                 throw new Exception($"The command {command.GetType()} requires a transaction");
 
-            return Retry.DoAsync(() => command.ExecuteAsync(_connection, _transaction), _retryOptions);
+            return Retry.DoAsync(() => command.ExecuteAsync(_connection, _transaction, cancellationToken), _retryOptions);
         }
 
-        public Task<T> ExecuteAsync<T>(IAsyncCommand<T> command)
+        public Task<T> ExecuteAsync<T>(IAsyncCommand<T> command, CancellationToken cancellationToken = default)
         {
             if (command.RequiresTransaction && _transaction == null)
                 throw new Exception($"The command {command.GetType()} requires a transaction");
             
-            return Retry.DoAsync(() => command.ExecuteAsync(_connection, _transaction), _retryOptions);
+            return Retry.DoAsync(() => command.ExecuteAsync(_connection, _transaction, cancellationToken), _retryOptions);
         }
 
 		public void Commit()
