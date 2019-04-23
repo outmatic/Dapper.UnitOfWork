@@ -54,7 +54,7 @@ namespace Dapper.UnitOfWork.Example
         {
             var factory = new UnitOfWorkFactory(ConnectionString);
 
-            using (var uow = factory.Create(retryOptions:new RetryOptions(5, 100, new SqlTransientExceptionDetector())))
+            using (var uow = await factory.CreateAsync(retryOptions:new RetryOptions(5, 100, new SqlTransientExceptionDetector())))
             {
                 var customer = await uow.QueryAsync(new GetCustomerByIdQuery("ALFKI"));
 
