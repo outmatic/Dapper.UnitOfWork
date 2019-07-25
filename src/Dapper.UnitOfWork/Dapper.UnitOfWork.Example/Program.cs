@@ -33,7 +33,7 @@ namespace Dapper.UnitOfWork.Example
 
 			PrintCustomer(newCustomerId);
 
-            Task.Run(async()=> await MainAsync(args));
+            Task.Run(async() => await MainAsync(args));
 
 			Console.WriteLine("Press any key to exit");
 			Console.ReadKey();

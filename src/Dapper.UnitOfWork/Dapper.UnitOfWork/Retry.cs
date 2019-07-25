@@ -31,7 +31,7 @@ namespace Dapper.UnitOfWork
                 }
                 catch (Exception ex)
                 {
-                    Task.Run(async()=> await HandleExceptionAsync(retryOptions, ex, retryCount));
+                    Task.Run(async() => await HandleExceptionAsync(retryOptions, ex, retryCount));
                 }
 
                 retryCount++;
