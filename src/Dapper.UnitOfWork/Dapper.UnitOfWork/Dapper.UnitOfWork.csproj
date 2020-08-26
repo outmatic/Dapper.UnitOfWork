@@ -2,10 +2,12 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard1.3;netstandard2.0;net451</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.6.5</Version>
+    <Version>1.7.0-beta</Version>
     <Authors>Alessandro Petrelli</Authors>
     <Company>OUTMATIC Alessandro Petrelli</Company>
-    <PackageReleaseNotes>1.6.5
+    <PackageReleaseNotes>1.7.0 - beta
+- Allow passing DbProviderFactory, so it can be used with other dbs
+1.6.5
 - missing Wait()
 1.6.4
 - fix possible deadlock
@@ -21,10 +23,10 @@
 1.3.0
 - change target to .net standard
 </PackageReleaseNotes>
-    <AssemblyVersion>1.6.4.0</AssemblyVersion>
-    <FileVersion>1.6.4.0</FileVersion>
+    <AssemblyVersion>1.7.0.0</AssemblyVersion>
+    <FileVersion>1.7.0.0</FileVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>Copyright (c) 2019 OUTMATIC Alessandro Petrelli</Copyright>
+    <Copyright>Copyright (c) 2020 OUTMATIC Alessandro Petrelli &amp; Contributors</Copyright>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.5" />
