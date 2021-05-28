@@ -2,10 +2,11 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard1.3;netstandard2.0;net451</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.6.5</Version>
+    <Version>1.7.0-beta</Version>
     <Authors>Alessandro Petrelli</Authors>
     <Company>OUTMATIC Alessandro Petrelli</Company>
-    <PackageReleaseNotes>
+    <PackageReleaseNotes>1.7.0 - beta
+- Allow passing DbProviderFactory, so it can be used with other dbs
 1.6.6
 - added overload for using the same cancellation token passed when constructing the uow
 1.6.5
@@ -24,8 +25,8 @@
 1.3.0
 - change target to .net standard
 </PackageReleaseNotes>
-    <AssemblyVersion>1.6.6.0</AssemblyVersion>
-    <FileVersion>1.6.6.0</FileVersion>
+    <AssemblyVersion>1.7.0.0</AssemblyVersion>
+    <FileVersion>1.7.0.0</FileVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>Copyright (c) OUTMATIC Alessandro Petrelli</Copyright>
     <PackOnBuild>true</PackOnBuild>
