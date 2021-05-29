@@ -5,7 +5,7 @@
     <Version>1.7.0-beta</Version>
     <Authors>Alessandro Petrelli</Authors>
     <Company>OUTMATIC Alessandro Petrelli</Company>
-    <PackageReleaseNotes>1.7.0 - beta
+    <PackageReleaseNotes>1.7.0 
 - Allow passing DbProviderFactory, so it can be used with other dbs
 1.6.6
 - added overload for using the same cancellation token passed when constructing the uow
@@ -30,7 +30,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>Copyright (c) OUTMATIC Alessandro Petrelli</Copyright>
     <PackOnBuild>true</PackOnBuild>
-    <PackageVersion>1.6.6</PackageVersion>
+    <PackageVersion>1.7.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.5" />
